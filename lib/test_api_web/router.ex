@@ -20,6 +20,12 @@ defmodule TestApiWeb.Router do
     get "/", PageController, :index
   end
 
+  scope "/", TestApiWeb do
+    pipe_through :api
+
+    match :*, "/api", ApiController, :any
+  end
+
   # Other scopes may use custom stacks.
   # scope "/api", TestApiWeb do
   #   pipe_through :api
