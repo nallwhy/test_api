@@ -45,7 +45,7 @@ window.liveSocket = liveSocket
 
 document.addEventListener("DOMContentLoaded", () => {
   document.querySelector("#example-button").addEventListener('click', async (e) => {
-    const url = window.location.href.split("?")[0] + "api"
+    const url = window.location.href.split("?")[0].replace(/\/+$/g, '') + "/api"
 
     const status = document.querySelector("#status").value
     const expected_response = document.querySelector("#response").value
