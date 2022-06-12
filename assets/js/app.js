@@ -25,6 +25,7 @@ import "phoenix_html"
 import {Socket} from "phoenix"
 import {LiveSocket} from "phoenix_live_view"
 import topbar from "../vendor/topbar"
+import fetchToCurl from 'fetch-to-curl';
 
 let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 let liveSocket = new LiveSocket("/live", Socket, {params: {_csrf_token: csrfToken}})
@@ -56,13 +57,19 @@ document.addEventListener("DOMContentLoaded", () => {
     })
     const filtered_body = Object.fromEntries(filtered_entries)
 
-    const response = await fetch(url, {
+    const options = {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(filtered_body)
-    })
+    }
+
+    const curl = fetchToCurl(url, options)
+
+    document.querySelector("#example-curl").innerText = curl
+
+    const response = await fetch(url, options)
 
     const response_body = await response.json()
     
