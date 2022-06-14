@@ -48,23 +48,32 @@ document.addEventListener("DOMContentLoaded", () => {
   document.querySelector("#example-button").addEventListener('click', async (e) => {
     document.querySelector("#example-response").innerText = "Waiting"
     
-    const url = window.location.href.split("?")[0].replace(/\/+$/g, '') + "/api"
+    let url = window.location.href.split("?")[0].replace(/\/+$/g, '') + "/api"
 
+    const method = document.querySelector("#method").value
     const status = document.querySelector("#status").value
-    const expected_response = document.querySelector("#response").value
+    const body = document.querySelector("#body").value
     const timeout = document.querySelector("#timeout").value
-    const body = { status, response: expected_response, timeout }
-    const filtered_entries = Object.entries(body).filter(([_, value]) => {
-      return value != ''
-    })
-    const filtered_body = Object.fromEntries(filtered_entries)
+    const request_params = { status, body, timeout }
 
-    const options = {
-      method: "POST",
+    let options = {
+      method: method,
       headers: {
         "Content-Type": "application/json",
-      },
-      body: JSON.stringify(filtered_body)
+      }
+    }
+
+    if (method == "get") {
+      const query = new URLSearchParams(request_params)
+
+      url += "?" + query
+    } else {
+      const filtered_entries = Object.entries(request_params).filter(([_, value]) => {
+        return value != ''
+      })
+      const filtered_request_params = Object.fromEntries(filtered_entries)
+
+      options.body = JSON.stringify(filtered_request_params)
     }
 
     const curl = fetchToCurl(url, options)

@@ -7,8 +7,14 @@
   <h2>Example</h2>
   <div id="example">
     <div>
+      <select id="method">
+        <option value="get">Get</option>
+        <option value="post">Post</option>
+        <option value="put">Put</option>
+        <option value="delete">Delete</option>
+      </select>
       <label>Status</label><input id="status" type="number" value="200">
-      <label>Response</label><textarea id="response">hi</textarea>
+      <label>Body</label><textarea id="body">hi</textarea>
       <label>Timeout</label><input id="timeout" type="number" value="1">
       <button id="example-button">Run</button>
     </div>

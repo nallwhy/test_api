@@ -3,7 +3,7 @@ defmodule TestApiWeb.ApiController do
 
   def any(conn, params) do
     status = params |> Map.get("status", 200) |> ensure_integer()
-    response = params |> Map.get("response", %{})
+    body = params |> Map.get("body", %{})
     timeout = params |> Map.get("timeout", 0) |> ensure_float()
 
     timeout_ms = (timeout * 1000) |> trunc()
@@ -12,7 +12,7 @@ defmodule TestApiWeb.ApiController do
 
     conn
     |> put_status(status)
-    |> json(response)
+    |> json(body)
   end
 
   defp ensure_integer(string) when is_binary(string) do
