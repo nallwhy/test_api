@@ -1,0 +1,106 @@
+# Load Test
+
+```elixir
+Mix.install([:chaperon, :req])
+```
+
+## Section
+
+<!-- livebook:{"branch_parent_index":0} -->
+
+## With Req
+
+```elixir
+require Logger
+
+count = 500
+timeout = 2
+
+url = "https://json.media/test_api/api?timeout=#{timeout}"
+# url = "http://localhost:4000/test_api/api?timeout=#{timeout}"
+
+{:ok, pid} = Finch.start_link(name: MyFinch, pools: %{default: [size: count]}) |> IO.inspect()
+
+request_fun = fn i ->
+  try do
+    result = Req.get!(url, finch: MyFinch, receive_timeout: :infinity, retry: :never)
+    Logger.debug("#{i} requested")
+
+    result
+  rescue
+    e -> {:error, inspect(e)}
+  end
+end
+
+{time_us, result} =
+  :timer.tc(fn ->
+    1..count
+    |> Task.async_stream(fn i -> request_fun.(i) end, max_concurrency: count, timeout: :infinity)
+    |> Enum.filter(fn
+      {:ok, %Req.Response{status: 200}} -> false
+      _ -> true
+    end)
+    |> Enum.map(&(&1 |> elem(1)))
+  end)
+
+Supervisor.stop(pid)
+
+{div(time_us, 1000), result}
+```
+
+```elixir
+result |> Enum.count()
+```
+
+<!-- livebook:{"branch_parent_index":0} -->
+
+## With Chaperon
+
+```elixir
+defmodule Scenario.HTTP.TestAPI do
+  use Chaperon.Scenario
+
+  def init(session) do
+    session
+    |> ok
+  end
+
+  def run(session) do
+    iterations = session |> config([:request, :iterations])
+
+    session
+    |> repeat_traced(:request, iterations)
+    |> log_info("Request finished after #{iterations} iterations")
+  end
+
+  def request(session) do
+    session
+    |> get("/api?timeout=10")
+  end
+
+  # @impl true
+  # def teardown(session) do
+  #   session
+  # end
+end
+
+defmodule LoadTest.TestAPI do
+  use Chaperon.LoadTest
+
+  def default_config() do
+    %{
+      base_url: "https://json.media/test_api"
+    }
+  end
+
+  def scenarios() do
+    [
+      {{10, Scenario.HTTP.TestAPI}, %{request: %{iterations: 10}}}
+    ]
+  end
+end
+```
+
+```elixir
+# Chaperon.run_load_test(LoadTest.TestAPI)
+```
