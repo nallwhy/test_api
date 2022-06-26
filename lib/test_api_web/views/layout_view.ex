@@ -1,6 +1,5 @@
 defmodule TestApiWeb.LayoutView do
   use TestApiWeb, :view
-  alias TestApiWeb.Endpoint
 
   # Phoenix LiveDashboard is available only in development by default,
   # so we instruct Elixir to not warn if the dashboard route is missing.
